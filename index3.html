@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Electronics Generator</title>
+    
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- html2canvas for Image Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        /* The Card Container to be captured */
+        #capture-area {
+            width: 1080px; /* High res width */
+            height: 1080px; /* Square aspect ratio for social media */
+            transform-origin: top left;
+            transform: scale(0.4); /* Scaled down for preview on screen */
+            margin-bottom: -648px; /* Negative margin to compensate for scale */
+        }
+
+        /* Responsive scaling for mobile */
+        @media (max-width: 768px) {
+            #capture-area {
+                transform: scale(0.28);
+                margin-bottom: -770px;
+                margin-left: -15px; /* Center alignment adjustment */
+            }
+            .preview-container {
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                height: 350px;
+            }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .font-oswald {
+            font-family: 'Oswald', sans-serif;
+        }
+        
+        .pattern-grid {
+            background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-mobile-screen-button text-indigo-600 text-2xl mr-2"></i>
+                    <h1 class="text-xl font-bold text-gray-900">Premium <span class="text-indigo-600">Electronics</span></h1>
+                </div>
+                <button onclick="window.print()" class="text-gray-500 hover:text-gray-700 hidden md:block">
+                    <i class="fa-solid fa-print"></i> Print
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT COLUMN: Controls -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- Input Form -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-lg font-semibold mb-4 border-b pb-2">Deal Details</h2>
+                    
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Brand & Model -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                                <select id="brandInput" onchange="updateModelList()" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                    <option value="apple">Apple</option>
+                                    <option value="samsung">Samsung</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Model Name</label>
+                                <select id="modelInput" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Specs -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Storage</label>
+                                <select id="storageInput" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="64GB">64GB</option>
+                                    <option value="128GB" selected>128GB</option>
+                                    <option value="256GB">256GB</option>
+                                    <option value="512GB">512GB</option>
+                                    <option value="1TB">1TB</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Region/Spec</label>
+                                <select id="specInput" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="EU Spec" selected>EU Spec</option>
+                                    <option value="US Spec">US Spec (LL/A)</option>
+                                    <option value="UK Spec">UK Spec</option>
+                                    <option value="JP Spec">JP Spec</option>
+                                    <option value="HK Spec">HK Dual Sim</option>
+                                    <option value="Global">Global</option>
+                                    <option value="Middle East">Middle East (TRA)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Grade & Price -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Grade/Condition</label>
+                                <select id="gradeInput" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="NEW">Brand New</option>
+                                    <option value="ASIS">ASIS</option>
+                                    <option value="ASIS PLUS">ASIS Plus</option>
+                                    <option value="A+">Grade A+</option>
+                                    <option value="A">Grade A</option>
+                                    <option value="B">Grade B</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Price (€)</label>
+                                <input type="number" id="priceInput" value="900" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500 font-bold text-indigo-600">
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Info -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sub-heading / Notes</label>
+                            <input type="text" id="noteInput" value="Limited Stock Available" class="w-full rounded-lg border-gray-300 border p-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customization -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-lg font-semibold mb-4 border-b pb-2">Design</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Custom Logo</label>
+                        <input type="file" id="logoUpload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition"/>
+                        <p class="text-xs text-gray-400 mt-1">Recommended: PNG with transparent background</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Theme Color</label>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="changeTheme('purple')" class="w-8 h-8 rounded-full bg-purple-600 ring-offset-2 hover:ring-2 ring-purple-500 transition shadow-sm"></button>
+                            <button onclick="changeTheme('blue')" class="w-8 h-8 rounded-full bg-blue-600 ring-offset-2 hover:ring-2 ring-blue-500 transition shadow-sm"></button>
+                            <button onclick="changeTheme('teal')" class="w-8 h-8 rounded-full bg-teal-500 ring-offset-2 hover:ring-2 ring-teal-400 transition shadow-sm"></button>
+                            <button onclick="changeTheme('green')" class="w-8 h-8 rounded-full bg-emerald-600 ring-offset-2 hover:ring-2 ring-emerald-500 transition shadow-sm"></button>
+                            <button onclick="changeTheme('gold')" class="w-8 h-8 rounded-full bg-yellow-500 ring-offset-2 hover:ring-2 ring-yellow-400 transition shadow-sm"></button>
+                            <button onclick="changeTheme('red')" class="w-8 h-8 rounded-full bg-red-600 ring-offset-2 hover:ring-2 ring-red-500 transition shadow-sm"></button>
+                            <button onclick="changeTheme('midnight')" class="w-8 h-8 rounded-full bg-indigo-900 ring-offset-2 hover:ring-2 ring-indigo-700 transition shadow-sm"></button>
+                            <button onclick="changeTheme('black')" class="w-8 h-8 rounded-full bg-gray-900 ring-offset-2 hover:ring-2 ring-gray-600 transition shadow-sm"></button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Background Style</label>
+                        <select id="bgStyleInput" onchange="updateBackground()" class="w-full rounded-lg border-gray-300 border p-2">
+                            <option value="gradient">Modern Gradient</option>
+                            <option value="solid">Solid Minimal</option>
+                            <option value="dark">Dark Mode</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Export Actions -->
+                <button onclick="downloadImage()" id="downloadBtn" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transform hover:-translate-y-1 transition flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-download"></i> Download JPEG Template
+                </button>
+                
+                <div id="statusMessage" class="hidden p-3 rounded-lg text-center text-sm font-medium"></div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Preview -->
+            <div class="lg:col-span-7">
+                <div class="sticky top-24">
+                    <div class="flex justify-between items-end mb-2">
+                        <h2 class="text-lg font-semibold text-gray-700">Live Preview</h2>
+                        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">1080x1080px Output</span>
+                    </div>
+                    
+                    <!-- Preview Container Wrapper (Handles the scaling overflow) -->
+                    <div class="preview-container bg-gray-200 rounded-xl border-4 border-dashed border-gray-300 flex justify-center items-start overflow-hidden relative" style="min-height: 450px;">
+                        
+                        <!-- THE CANVAS (Scaled down) -->
+                        <div id="capture-area" class="relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex flex-col items-center justify-center p-16 shadow-2xl overflow-hidden">
+                            
+                            <!-- Background Elements -->
+                            <div class="absolute inset-0 pattern-grid opacity-30"></div>
+                            <div class="absolute -top-20 -left-20 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl"></div>
+                            <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
+
+                            <!-- Main Card Content -->
+                            <div class="relative w-full h-full glass-panel rounded-3xl border border-white/30 flex flex-col justify-between p-12 text-white shadow-2xl">
+                                
+                                <!-- Header -->
+                                <div class="flex justify-between items-start">
+                                    <div class="bg-white/20 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 flex items-center gap-2">
+                                        <i class="fa-solid fa-star text-yellow-300 text-sm"></i>
+                                        <span class="font-mono text-lg tracking-widest opacity-90 font-bold uppercase">Premium Electronics</span>
+                                    </div>
+                                    <div id="brandIconContainer" class="text-6xl opacity-90 h-16 w-16 flex items-center justify-center">
+                                        <i id="brandIcon" class="fa-brands fa-apple"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Center: Product Info -->
+                                <div class="text-center space-y-6 mt-10">
+                                    <h1 id="previewModel" class="font-oswald text-8xl font-bold tracking-tight leading-tight uppercase drop-shadow-lg">
+                                        iPhone 16 Pro
+                                    </h1>
+                                    
+                                    <div class="flex justify-center gap-4 flex-wrap">
+                                        <span id="previewStorage" class="px-6 py-2 bg-white text-gray-900 text-3xl font-bold rounded-lg shadow-lg">
+                                            128GB
+                                        </span>
+                                        <span id="previewSpec" class="px-6 py-2 bg-black/40 border border-white/30 text-white text-3xl font-bold rounded-lg backdrop-blur-sm">
+                                            EU Spec
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-8">
+                                        <span id="previewGrade" class="inline-block px-8 py-2 border-2 border-white rounded-full text-2xl font-bold tracking-widest uppercase bg-white/10">
+                                            ASIS CONDITION
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Footer: Price -->
+                                <div class="mt-auto pt-12 border-t border-white/20 flex flex-col items-center relative">
+                                    <div class="absolute -top-8 bg-yellow-400 text-black px-4 py-1 font-bold rounded shadow-lg transform -rotate-2">
+                                        BEST DEAL
+                                    </div>
+                                    
+                                    <div class="flex items-start">
+                                        <span class="text-4xl mt-4 mr-2 opacity-80">€</span>
+                                        <span id="previewPrice" class="font-oswald text-9xl font-bold tracking-tighter drop-shadow-xl">900</span>
+                                    </div>
+                                    
+                                    <p id="previewNote" class="mt-4 text-2xl opacity-80 font-light tracking-wide">Limited Stock Available</p>
+                                </div>
+                                
+                                <!-- Watermark/Footer -->
+                                <div class="absolute bottom-4 left-6 text-sm opacity-50 font-mono flex gap-4">
+                                    <span><i class="fa-solid fa-globe"></i> Premium Electronics</span>
+                                </div>
+                                <div class="absolute bottom-4 right-6 text-sm opacity-40 font-mono">
+                                    ID: #<span id="randomId">8392</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Helper Text -->
+                    <div class="mt-4 bg-blue-50 text-blue-800 p-4 rounded-lg flex items-start gap-3">
+                        <i class="fa-solid fa-circle-info mt-1"></i>
+                        <div>
+                            <p class="font-bold">Generated Text Format:</p>
+                            <p id="textFormatOutput" class="font-mono text-sm mt-1 select-all bg-white p-2 rounded border border-blue-100">iPhone 16 Pro 128GB ASIS EU *900 €</p>
+                            <button onclick="copyText()" class="text-xs font-bold uppercase mt-2 text-blue-600 hover:underline">Copy Text</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data Sources ---
+        const models = {
+            apple: [
+                "iPhone 16 Pro Max", "iPhone 16 Pro", "iPhone 16 Plus", "iPhone 16",
+                "iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15 Plus", "iPhone 15",
+                "iPhone 14 Pro Max", "iPhone 14 Pro", "iPhone 14 Plus", "iPhone 14",
+                "iPhone 13 Pro Max", "iPhone 13 Pro", "iPhone 13 mini", "iPhone 13",
+                "iPhone 12 Pro Max", "iPhone 12 Pro", "iPhone 12", "iPhone 11",
+                "iPhone XS Max", "iPhone XR", "iPhone X", "iPhone SE (2022)"
+            ],
+            samsung: [
+                "Galaxy S24 Ultra", "Galaxy S24+", "Galaxy S24",
+                "Galaxy S23 Ultra", "Galaxy S23+", "Galaxy S23 FE",
+                "Galaxy S22 Ultra", "Galaxy S22",
+                "Galaxy Z Fold6", "Galaxy Z Flip6", "Galaxy Z Fold5", "Galaxy Z Flip5",
+                "Galaxy A55", "Galaxy A54", "Galaxy A35", "Galaxy Note 20 Ultra"
+            ]
+        };
+
+        // --- State Management ---
+        const inputs = {
+            brand: document.getElementById('brandInput'),
+            model: document.getElementById('modelInput'),
+            storage: document.getElementById('storageInput'),
+            spec: document.getElementById('specInput'),
+            grade: document.getElementById('gradeInput'),
+            price: document.getElementById('priceInput'),
+            note: document.getElementById('noteInput'),
+            bgStyle: document.getElementById('bgStyleInput'),
+            logo: document.getElementById('logoUpload')
+        };
+
+        const previews = {
+            iconContainer: document.getElementById('brandIconContainer'),
+            model: document.getElementById('previewModel'),
+            storage: document.getElementById('previewStorage'),
+            spec: document.getElementById('previewSpec'),
+            grade: document.getElementById('previewGrade'),
+            price: document.getElementById('previewPrice'),
+            note: document.getElementById('previewNote'),
+            textOutput: document.getElementById('textFormatOutput'),
+            card: document.getElementById('capture-area')
+        };
+
+        let currentTheme = 'purple';
+        let customLogoData = null;
+
+        // --- Event Listeners ---
+        // We attach listeners to inputs after we populate the models
+        
+        // --- Logic ---
+
+        function updateModelList() {
+            const brand = inputs.brand.value;
+            const modelSelect = inputs.model;
+            const selectedModels = models[brand] || [];
+            
+            // Clear existing
+            modelSelect.innerHTML = '';
+            
+            // Populate
+            selectedModels.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.innerText = model;
+                modelSelect.appendChild(option);
+            });
+
+            // Trigger preview update
+            updatePreview();
+        }
+
+        function updatePreview() {
+            // Update Text Content
+            previews.model.innerText = inputs.model.value || 'Model';
+            previews.storage.innerText = inputs.storage.value || 'Storage';
+            
+            // Shorten spec for display if needed
+            const specVal = inputs.spec.value;
+            previews.spec.innerText = specVal.replace(' Spec', '').replace(' Dual Sim', ''); 
+            
+            previews.price.innerText = inputs.price.value || '0';
+            previews.note.innerText = inputs.note.value;
+            
+            // Update Grade Text
+            const gradeMap = {
+                'NEW': 'BRAND NEW',
+                'ASIS': 'ASIS',
+                'ASIS PLUS': 'ASIS PLUS',
+                'A+': 'GRADE A+',
+                'A': 'GRADE A',
+                'B': 'GRADE B'
+            };
+            previews.grade.innerText = gradeMap[inputs.grade.value] || inputs.grade.value;
+
+            // Update Brand Icon
+            // If custom logo exists, use it. Otherwise use brand icon.
+            if (customLogoData) {
+                previews.iconContainer.innerHTML = `<img src="${customLogoData}" class="h-16 w-auto object-contain drop-shadow-lg" alt="Logo">`;
+            } else {
+                const brandIcons = {
+                    'apple': '<i class="fa-brands fa-apple"></i>',
+                    'samsung': '<span class="font-bold tracking-tighter text-4xl" style="font-family: sans-serif;">SAMSUNG</span>'
+                };
+                previews.iconContainer.innerHTML = brandIcons[inputs.brand.value] || brandIcons['apple'];
+            }
+
+            // Update Formatted String for Copying
+            const simpleStorage = inputs.storage.value.replace('GB', '').replace('TB', 'TB');
+            const simpleSpec = inputs.spec.value.split(' ')[0]; // Take first word (EU, US, Global)
+            const textString = `${inputs.model.value} ${simpleStorage} ${inputs.grade.value} ${simpleSpec} *${inputs.price.value} €`;
+            previews.textOutput.innerText = textString;
+        }
+
+        // Logo Upload Handler
+        inputs.logo.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    customLogoData = e.target.result;
+                    updatePreview();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function changeTheme(color) {
+            const gradients = {
+                'blue': 'bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-700',
+                'purple': 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500', 
+                'teal': 'bg-gradient-to-br from-teal-400 via-emerald-500 to-green-600',
+                'green': 'bg-gradient-to-br from-emerald-500 via-green-600 to-teal-700',
+                'gold': 'bg-gradient-to-br from-yellow-400 via-orange-300 to-yellow-600',
+                'red': 'bg-gradient-to-br from-red-500 via-rose-500 to-orange-600',
+                'midnight': 'bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800',
+                'black': 'bg-gradient-to-br from-gray-900 via-gray-800 to-black',
+            };
+
+            // Remove existing bg classes
+            previews.card.className = previews.card.className.replace(/bg-gradient-to-br from-\w+(-\d+)? via-\w+(-\d+)? to-\w+(-\d+)?/g, '');
+            
+            // Add new class
+            previews.card.classList.add(...gradients[color].split(' '));
+            currentTheme = color;
+            updateBackground(); // Re-apply style logic if needed
+        }
+
+        function updateBackground() {
+            const style = inputs.bgStyle.value;
+            const card = previews.card;
+            
+            // Reset base classes first
+            card.classList.remove('bg-white', 'text-gray-900', 'bg-gray-950');
+            
+            if (style === 'solid') {
+                // Remove gradient
+                card.className = card.className.replace(/bg-gradient-to-br[\w-\s]+/, '');
+                card.classList.add('bg-white');
+                
+                const solidColors = {
+                    'blue': 'bg-blue-600',
+                    'purple': 'bg-indigo-600',
+                    'teal': 'bg-teal-600',
+                    'green': 'bg-emerald-600',
+                    'gold': 'bg-yellow-600',
+                    'red': 'bg-red-600',
+                    'midnight': 'bg-indigo-900',
+                    'black': 'bg-gray-900',
+                };
+                card.classList.add(solidColors[currentTheme] || 'bg-gray-900');
+            } else if (style === 'dark') {
+                 // Force dark theme
+                 card.className = card.className.replace(/bg-gradient-to-br[\w-\s]+/, '');
+                 card.classList.add('bg-gray-950');
+            } else {
+                // Restore gradient
+                changeTheme(currentTheme);
+            }
+        }
+
+        // --- Export Functionality ---
+        function downloadImage() {
+            const captureArea = document.getElementById('capture-area');
+            const btn = document.getElementById('downloadBtn');
+            const originalText = btn.innerHTML;
+
+            // Feedback UI
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+            btn.disabled = true;
+
+            html2canvas(captureArea, {
+                scale: 1, 
+                backgroundColor: null, 
+                useCORS: true, 
+                logging: false,
+                width: 1080,
+                height: 1080,
+                onclone: (clonedDoc) => {
+                    const clonedArea = clonedDoc.getElementById('capture-area');
+                    clonedArea.style.transform = 'none'; 
+                    clonedArea.style.margin = '0';
+                }
+            }).then(canvas => {
+                const image = canvas.toDataURL("image/jpeg", 0.9);
+                const link = document.createElement('a');
+                // Updated Filename
+                const filename = `PremiumElectronics_${inputs.model.value.replace(/\s+/g, '_')}_${inputs.grade.value}.jpg`;
+                link.download = filename;
+                link.href = image;
+                link.click();
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showStatus('Image downloaded successfully!', 'bg-green-100 text-green-800');
+            }).catch(err => {
+                console.error(err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showStatus('Error generating image.', 'bg-red-100 text-red-800');
+            });
+        }
+
+        function copyText() {
+            const text = previews.textOutput.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showStatus('Text copied to clipboard!', 'bg-blue-100 text-blue-800');
+            });
+        }
+
+        function showStatus(msg, classes) {
+            const el = document.getElementById('statusMessage');
+            el.innerText = msg;
+            el.className = `mt-2 p-3 rounded-lg text-center text-sm font-medium ${classes}`;
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 3000);
+        }
+
+        // --- Initialization ---
+        // Attach listeners manually to ensure everything is hooked up
+        Object.values(inputs).forEach(input => {
+            if(input) input.addEventListener('input', updatePreview);
+        });
+
+        document.getElementById('brandInput').addEventListener('change', updateModelList);
+        document.getElementById('randomId').innerText = Math.floor(1000 + Math.random() * 9000);
+        
+        // Initial Run
+        updateModelList(); // This also calls updatePreview
+
+    </script>
+</body>
+</html>
